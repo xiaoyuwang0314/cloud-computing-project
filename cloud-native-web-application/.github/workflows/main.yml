@@ -1,0 +1,87 @@
+name: Continuous Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: AWS_DEPLOYMENT
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set environment variables for database connection and JWT
+      - name: Set environment variables for database
+        run: |
+          echo "DB_URL=jdbc:mysql://${{ secrets.MYSQL_PRIVATE_IP }}:3306/recommend" >> $GITHUB_ENV
+          echo "DB_USERNAME=${{ secrets.DATABASE_USER_NAME }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> $GITHUB_ENV
+          echo "WEBAPP_SECRET_KEY=${{ secrets.WEBAPP_SECRET_KEY }}" >> $GITHUB_ENV
+
+      # Step 3: Build the project
+      - name: Build the project
+        run: mvn clean install -DskipTests
+        working-directory: ./movie
+
+      # Step 4: Install Packer
+      - name: Install Packer
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt update && sudo apt install -y packer
+
+      # Step 5: Copy the JAR file to Packer directory
+      - name: Package the project and copy to packer
+        run: |
+          cp ./movie/target/movie-0.0.1-SNAPSHOT.jar ./webapp_packer/movie.jar
+          chmod 755 ./webapp_packer/movie.jar
+
+      # Step 6: Set up AWS CLI to interact with AWS
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      # Step 7: Configure AWS Credentials
+      - name: Configure AWS Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
+      # Step 8: Validate Packer Template - webapp
+      - name: Validate Packer Template - webapp
+        working-directory: ./webapp_packer
+        run: |
+          packer init .
+          packer validate .
+
+      # Step 9: Build AMI with Packer - webapp
+      - name: Build AMI with Packer - webapp
+        working-directory: ./webapp_packer
+        run: |
+          packer build .
+
+      # Step 10: Validate Packer Template - mysql
+      - name: Validate Packer Template - mysql
+        working-directory: ./mysql_packer
+        run: |
+          packer init .
+          packer validate .
+
+      # Step 11: Build AMI with Packer - mysql
+      - name: Build AMI with Packer - mysql
+        working-directory: ./mysql_packer
+        run: |
+          packer build .
+
+      #Step 12: clean jar
+      - name: Clean Up JAR from Local
+        run: rm -f ./packer/movie.jar

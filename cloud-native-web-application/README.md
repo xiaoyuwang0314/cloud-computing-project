@@ -1,7 +1,21 @@
-# Movie Web Application
+# Movie Web Application - backend
 
 ## Project Overview
 A cloud-native web application for movie management built with Spring Boot and MySQL. The application features secure user authentication, movie data management, and health monitoring capabilities.
+
+## 🔗 Related Repositories
+
+- **Frontend** (React + Vite + D3 + JWT Auth):  
+  🎨 [movie-recommendation-app-frontend](https://github.com/xiaoyuwang0314/movie-recommendation-app-frontend)
+
+- **Live Site**:  
+  🌐 [https://frontend.justanotherapp.me](https://frontend.justanotherapp.me)
+
+- **Infrastructure** (Terraform + EC2 + CI/CD):  
+  🛠️ [cloud-computing-infra](https://github.com/xiaoyuwang0314/cloud-computing-infra)
+
+- **Recommendation Engine (Planned)**  
+  🚧 Not started yet — planned for collaborative filtering + ML-based similarity.
 
 ## Technical Stack
 - **Language**: Java (OpenJDK 17)

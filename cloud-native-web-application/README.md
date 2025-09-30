@@ -8,8 +8,8 @@ A cloud-native web application for movie management built with Spring Boot and M
 - **Frontend** (React + Vite + D3 + JWT Auth):  
   🎨 [movie-recommendation-app-frontend](https://github.com/xiaoyuwang0314/movie-recommendation-app-frontend)
 
-- **Live Site**:  
-  🌐 [https://frontend.justanotherapp.me](https://frontend.justanotherapp.me)
+- **~Live Site~** Temporarily closed:  
+  🌐 ~[https://frontend.justanotherapp.me](https://frontend.justanotherapp.me)~
 
 - **Infrastructure** (Terraform + EC2 + CI/CD):  
   🛠️ [cloud-computing-infra](https://github.com/xiaoyuwang0314/cloud-computing-infra)
